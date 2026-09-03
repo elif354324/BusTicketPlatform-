@@ -1,0 +1,251 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Yolcu Bilet Arama Sistemi</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* GÜNCELLENDİ: Daha geniş ve şık bir üst alan (Hero Section) */
+        .header {
+            background-color: #d23b38;
+            color: white;
+            width: 100%;
+            padding: 60px 0 120px 0; /* Alt boşluğu (120px) artırdık ki arama kutusu içine otursun */
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+            .header h1 {
+                margin: 0;
+                font-size: 36px;
+                letter-spacing: 1px;
+            }
+
+            .header p {
+                margin: 10px 0 0 0;
+                font-size: 18px;
+                opacity: 0.9;
+            }
+
+        /* GÜNCELLENDİ: Arama Motoru Kutusu (Biraz daha aşağı indi ve büyüdü) */
+        .search-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            margin-top: -60px; /* Kutuyu kırmızı alanın üzerine yarım bindiriyoruz */
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15); /* Gölgeyi belirginleştirdik */
+            display: flex;
+            gap: 20px;
+            align-items: flex-end;
+            max-width: 1000px; /* Kutuyu biraz daha genişlettik */
+            width: 90%;
+            position: relative;
+            z-index: 10;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+            .input-group label {
+                font-size: 14px;
+                color: #495057;
+                margin-bottom: 8px;
+                font-weight: 600;
+            }
+
+            .input-group input {
+                padding: 15px; /* Kutuları büyüttük */
+                border: 1px solid #ced4da;
+                border-radius: 8px;
+                font-size: 16px;
+                background-color: #fff;
+                transition: border-color 0.3s;
+            }
+
+                .input-group input:focus {
+                    outline: none;
+                    border-color: #d23b38;
+                    box-shadow: 0 0 0 0.2rem rgba(210, 59, 56, 0.25);
+                }
+
+        .btn-search {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            height: 52px;
+            box-shadow: 0 4px 6px rgba(40, 167, 69, 0.3);
+        }
+
+            .btn-search:hover {
+                background-color: #218838;
+                transform: translateY(-2px);
+                box-shadow: 0 6px 12px rgba(40, 167, 69, 0.4);
+            }
+
+        /* Sonuç Listesi Alanı */
+        #sonucListesi {
+            margin-top: 50px;
+            width: 90%;
+            max-width: 950px;
+        }
+
+        /* Otobüs Sefer Kartı */
+        .trip-card {
+            background: white;
+            border: 1px solid #eaeaea;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+
+            .trip-card:hover {
+                transform: scale(1.01);
+                border-color: #d23b38;
+            }
+
+        .trip-info h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 22px;
+        }
+
+        .trip-info p {
+            margin: 5px 0;
+            color: #6c757d;
+            font-size: 15px;
+        }
+
+        .trip-price {
+            font-size: 28px;
+            font-weight: bold;
+            color: #d23b38;
+        }
+
+        .btn-select {
+            background-color: #d23b38; /* Butonları da markanın rengine uydurduk */
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+            .btn-select:hover {
+                background-color: #b02a28;
+            }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Otobüs Bileti Bul</h1>
+        <p>Yüzlerce sefer arasından sana en uygununu hemen seç!</p>
+    </div>
+
+    <div class="search-container">
+        <div class="input-group">
+            <label>Nereden</label>
+            <input type="text" id="kalkis" placeholder="Örn: Manisa" value="Manisa">
+        </div>
+
+        <div class="input-group">
+            <label>Nereye</label>
+            <input type="text" id="varis" placeholder="Örn: Ayvalık" value="Ayvalık">
+        </div>
+
+        <div class="input-group">
+            <label>Gidiş Tarihi</label>
+            <input type="date" id="tarih">
+        </div>
+
+        <button class="btn-search" onclick="seferAra()">Otobüs Bul ➔</button>
+    </div>
+
+    <!-- Arama sonuçları buraya dizilecek -->
+    <div id="sonucListesi"></div>
+
+    <script>
+        // Tarih kutusuna bugünün tarihini otomatik yaz
+        document.getElementById('tarih').valueAsDate = new Date();
+
+        async function seferAra() {
+            const kalkis = document.getElementById('kalkis').value;
+            const varis = document.getElementById('varis').value;
+            const tarih = document.getElementById('tarih').value;
+
+            const sonucDiv = document.getElementById('sonucListesi');
+            sonucDiv.innerHTML = '<p style="text-align:center;">Seferler aranıyor...</p>';
+
+            // API'ye GET isteği at (C# tarafında yazdığımız o yeni Search metoduna gidiyor)
+            try {
+                const url = `https://localhost:7087/api/Trips/search?from=${kalkis}&to=${varis}&date=${tarih}`;
+                const response = await fetch(url);
+
+                if (!response.ok) {
+                    sonucDiv.innerHTML = '<p style="text-align:center; color:red;">Bu güzergahta sefer bulunamadı.</p>';
+                    return;
+                }
+
+                const seferler = await response.json();
+                sonucDiv.innerHTML = ''; // Temizle
+
+                // Gelen seferleri Obilet kartları gibi ekrana diz
+                seferler.forEach(sefer => {
+                    // Saati daha düzgün göstermek için formatlayalım
+                    const saat = new Date(sefer.departureTime).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+
+                    sonucDiv.innerHTML += `
+                            <div class="trip-card">
+                                <div class="trip-info">
+                                    <h3>🕒 ${saat} | ${sefer.companyName}</h3>
+                                    <p><strong>Güzergah:</strong> ${sefer.departureCity} ➔ ${sefer.arrivalCity}</p>
+                                    <p><strong>Otobüs Tipi:</strong> ${sefer.busType} | <span style="color:green;">${sefer.availableSeatCount} Boş Koltuk</span></p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div class="trip-price">${sefer.price} ₺</div>
+                                    <br>
+                                    <button class="btn-select" onclick="koltukSecimineGit(${sefer.id})">Koltuk Seç</button>
+                                </div>
+                            </div>
+                        `;
+                });
+
+            } catch (error) {
+                sonucDiv.innerHTML = '<p style="text-align:center; color:red;">Sisteme bağlanılamadı.</p>';
+                console.error(error);
+            }
+        }
+
+        function koltukSecimineGit(seferId) {
+            alert(seferId + " numaralı seferin koltuk seçim ekranı (Faz 2'de) burada açılacak!");
+            // İleride o yaptığımız yeşil/kırmızı otobüs haritasını burada bir Modal (Popup) içinde açacağız.
+        }
+    </script>
+</body>
+</html>
